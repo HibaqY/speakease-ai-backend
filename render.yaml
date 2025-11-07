@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: speakease-backend
+    env: python
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
+    startCommand: ./start.sh
+    plan: free
+
