@@ -20,6 +20,7 @@ from datetime import datetime
 import logging
 import joblib
 from scipy.fftpack import dct
+import requests
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -405,6 +406,42 @@ class AnalysisResponse(BaseModel):
     explanation: str
     needs_evaluation: bool
     timestamp: str
+
+# ============================================================================
+# AUTO-DOWNLOAD MODEL FILES (Google Drive)
+# ============================================================================
+
+def download_if_missing(url, path):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    if not os.path.exists(path):
+        logger.info(f"⬇️ Downloading {os.path.basename(path)} from cloud...")
+        try:
+            r = requests.get(url, allow_redirects=True)
+            if r.status_code == 200:
+                with open(path, "wb") as f:
+                    f.write(r.content)
+                logger.info(f"✅ Downloaded {os.path.basename(path)}")
+            else:
+                logger.warning(f"⚠️ Failed to download {path}, status {r.status_code}")
+        except Exception as e:
+            logger.warning(f"⚠️ Error downloading {path}: {e}")
+
+# Google Drive → direct download links
+STAGE1_URL = "https://drive.google.com/uc?export=download&id=195-zaraGwuV5ef-SPnksBwEu2licA94B"
+STAGE2_URL = "https://drive.google.com/uc?export=download&id=1OesJaFsvw9bV9paRyKg9VwttGPZ_tBoO"
+SCALER_URL = "https://drive.google.com/uc?export=download&id=13VdQVfIGozjfEYJa809RjRPvNeq3OO7q"
+
+# Local paths used by the model loader
+STAGE1_PATH = "models/stage1_model.pth"
+STAGE2_PATH = "models/stage2_model.pth"
+SCALER_PATH = "models/stage1_scaler.pkl"
+
+# Download if missing
+download_if_missing(STAGE1_URL, STAGE1_PATH)
+download_if_missing(STAGE2_URL, STAGE2_PATH)
+download_if_missing(SCALER_URL, SCALER_PATH)
+
+logger.info("✅ Model files checked.")
 
 
 # ============================================================================
