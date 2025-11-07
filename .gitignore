@@ -1,0 +1,7 @@
+venv/
+__pycache__/
+*.pth
+*.pkl
+models/*.pth
+models/*.pkl
+.DS_Store
